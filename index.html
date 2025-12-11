@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đề Cương Ôn Tập Tiếng Trung</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.2);
+            height: 8px;
+            margin-top: 20px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: white;
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .quiz-container {
+            padding: 40px;
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+        }
+
+        .questions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .question-card {
+            display: block;
+            animation: fadeIn 0.5s;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .question-number {
+            color: #667eea;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option {
+            padding: 18px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f0f2ff;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .option.correct {
+            border-color: #28a745;
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .option.correct.selected {
+            background: #28a745;
+            color: white;
+        }
+
+        .option.incorrect {
+            border-color: #dc3545;
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .option.show-correct {
+            border-color: #28a745;
+            background: #d4edda;
+            color: #155724;
+            border-width: 3px;
+        }
+
+        .option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .option-label {
+            font-size: 16px;
+            flex: 1;
+        }
+
+        .answer-feedback {
+            margin-top: 15px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            display: none;
+        }
+
+        .answer-feedback.show {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        .answer-feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #28a745;
+        }
+
+        .answer-feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #dc3545;
+        }
+
+        .correct-answer-label {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: center;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #e0e0e0;
+            position: sticky;
+            bottom: 0;
+            background: white;
+            z-index: 10;
+        }
+
+        .btn {
+            padding: 14px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        .btn-prev {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-prev:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-next {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-next:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-submit {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results-container {
+            display: none;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .results-container.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        .results-header {
+            font-size: 32px;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .score {
+            font-size: 48px;
+            font-weight: bold;
+            color: #28a745;
+            margin: 30px 0;
+        }
+
+        .score-info {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 40px;
+        }
+
+        .review-section {
+            margin-top: 40px;
+            text-align: left;
+        }
+
+        .review-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .review-question {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .review-answer {
+            font-size: 14px;
+            color: #666;
+            margin-top: 8px;
+        }
+
+        .review-answer.correct {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .review-answer.incorrect {
+            color: #dc3545;
+        }
+
+        .btn-restart {
+            background: #667eea;
+            color: white;
+            margin-top: 0;
+        }
+
+        .btn-restart:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            gap: 20px;
+        }
+
+        .question-counter {
+            flex: 1;
+            text-align: left;
+            color: #666;
+            font-size: 16px;
+            font-weight: 600;
+            padding: 15px;
+            background: #f0f2ff;
+            border-radius: 10px;
+        }
+
+        .restart-btn-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .quiz-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .quiz-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .quiz-container::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+        }
+
+        .quiz-container::-webkit-scrollbar-thumb:hover {
+            background: #5568d3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Đề Cương Ôn Tập Tiếng Trung</h1>
+            <p>Chọn đáp án đúng để trả lời câu hỏi</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <div class="quiz-container" id="quizContainer">
+            <div class="top-bar">
+                <div class="question-counter" id="questionCounter"></div>
+                <div class="restart-btn-container">
+                    <button class="btn btn-restart" onclick="restartQuiz()">Làm lại</button>
+                </div>
+            </div>
+            <div class="questions-list" id="questionsContainer"></div>
+        </div>
+
+        <div class="results-container" id="resultsContainer">
+            <h2 class="results-header">Kết Quả</h2>
+            <div class="score" id="scoreDisplay"></div>
+            <div class="score-info" id="scoreInfo"></div>
+            <div class="review-section" id="reviewSection"></div>
+            <button class="btn btn-restart" onclick="restartQuiz()">Làm lại</button>
+        </div>
+    </div>
+
+    <script>
+        // Dữ liệu câu hỏi từ PDF
+        const questions = [
+            {
+                id: 1,
+                question: "据考古遗址证实, 距今四十万年的远古时代, 越南土地上已发现了什么?",
+                options: [
+                    "A. 东山文化",
+                    "B. 旧石器时代的遗址",
+                    "C. 人类生活的痕迹",
+                    "D. 水稻种植文明"
+                ],
+                correct: 1 // B
+            },
+            {
+                id: 2,
+                question: "考古学家在越南清化省、福寿省、和平省和谅山省发现了什么?",
+                options: [
+                    "A. 山东文化",
+                    "B. 旧石器时代的遗址（距今 30 万年）",
+                    "C. 种植水稻文明",
+                    "D. 出土文物中最有名的铜鼓"
+                ],
+                correct: 1 // B
+            },
+            {
+                id: 3,
+                question: "考古学家在越南北部的一些地区发现了什么?",
+                options: [
+                    "A. 距今一万年旧石器器时代的遗址",
+                    "B. 距今三万年中石器时代的遗址",
+                    "C. 距今一万年中石器时代的遗址",
+                    "D. 距今一万年新石器时代的遗址"
+                ],
+                correct: 3 // D
+            },
+            {
+                id: 4,
+                question: "越南历史上第一国家的名称是什么?",
+                options: [
+                    "A. 瓯雉国",
+                    "B. 文郎国",
+                    "C. 大瞿越国",
+                    "D. 大越国"
+                ],
+                correct: 1 // B
+            },
+            {
+                id: 5,
+                question: "文郎国以什么文化为代表?",
+                options: [
+                    "A. 东山文化",
+                    "B. 西原文化",
+                    "C. 西北文化",
+                    "D. 南部文化"
+                ],
+                correct: 0 // A
+            },
+            {
+                id: 6,
+                question: "最著名的出土文物是什么?",
+                options: [
+                    "A. 水稻",
+                    "B. 铜鼓",
+                    "C. 东山文化遗址",
+                    "D. 畜牧用具"
+                ],
+                correct: 1 // B
+            },
+            {
+                id: 7,
+                question: "根据考古遗址，考古学家得出什么结论？",
+                options: [
+                    "A. 石器时代人类已经学会缝纫",
+                    "B. 石器时代人类已经学会畜牧",
+                    "C. 石器时代人类已经学会水稻种植",
+                    "D. 石器时代人类已经掌握畜牧和水稻种植"
+                ],
+                correct: 3 // D
+            },
+            {
+                id: 8,
+                question: "文郎国延续了几个世纪，形成了什么时代？",
+                options: [
+                    "A. 陈朝时代",
+                    "B. 黎朝时代",
+                    "C. 李朝时代",
+                    "D. 雄王时代"
+                ],
+                correct: 3 // D
+            },
+            {
+                id: 9,
+                question: "公元前 3 世纪，越南被中国封建王朝统治了多久？",
+                options: [
+                    "A. 十多个世纪",
+                    "B. 二十多个世纪",
+                    "C. 三十多个世纪",
+                    "D. 四十多个世纪"
+                ],
+                correct: 0 // A
+            },
+            {
+                id: 10,
+                question: "李朝建立的独立国家名称是什么？",
+                options: [
+                    "A. 文郎国",
+                    "B. 瓯雒国",
+                    "C. 大瞿越国",
+                    "D. 大越国"
+                ],
+                correct: 2 // C
+            },
+            {
+                id: 11,
+                question: "越南 1010 年的首都名称是什么？",
+                options: [
+                    "A. 河内",
+                    "B. 升龙",
+                    "C. 文郎",
+                    "D. 大越"
+                ],
+                correct: 1 // B
+            },
+            {
+                id: 12,
+                question: "19 世纪末，哪个国家对越南进行殖民侵略？",
+                options: [
+                    "A. 英国",
+                    "B. 美国",
+                    "C. 法国",
+                    "D. 日本"
+                ],
+                correct: 2 // C
+            },
+            {
+                id: 13,
+                question: "胡志明主席在哪一年离开祖国，前往海外寻求救国之路？",
+                options: [
+                    "A. 1910 年",
+                    "B. 1911 年",
+                    "C. 1912 年",
+                    "D. 1913 年"
+                ],
+                correct: 1 // B
+            },
+            {
+                id: 14,
+                question: "1930 年 2 月 3 日，阮爱国在中国香港进行了什么活动？",
+                options: [
+                    "A. 宣布成立越南社会主义共和国",
+                    "B. 召开会议并成立越南共产党",
+                    "C. 会见外国政府领导人",
+                    "D. 会见越南共产党党员"
+                ],
+                correct: 1 // B
+            },
+            {
+                id: 15,
+                question: "1945 年 9 月 2 日，胡志明主席在河内巴亭广场做了什么？",
+                options: [
+                    "A. 召开越南共产党第一届全国代表大会",
+                    "B. 宣读《独立宣言》，宣布成立越南民主共和国",
+                    "C. 离开祖国前往海外寻求救国之路",
+                    "D. 其他"
+                ],
+                correct: 1 // B
+            },
+            {
+                id: 16,
+                question: "1976 年，越南改名为什么？",
+                options: [
+                    "A. 越南民主共和国",
+                    "B. 越南社会民主共和国",
+                    "C. 越南主义共和国",
+                    "D. 越南社会主义共和国"
+                ],
+                correct: 3 // D
+            },
+            {
+                id: 17,
+                question: "胡志明主席的出生地在哪里？",
+                options: [
+                    "A. 越南中部河静省干禄县",
+                    "B. 越南中部义安省奇山县",
+                    "C. 越南中部义安省南坛县",
+                    "D. 越南中部河静省香山县"
+                ],
+                correct: 2 // C
+            },
+            {
+                id: 18,
+                question: "胡志明 15 岁时在越南哪所学校就读？",
+                options: [
+                    "A. 顺化国立学校",
+                    "B. 河内国子监学校",
+                    "C. 河内陈国粹学校",
+                    "D. 荣市国立学校"
+                ],
+                correct: 0 // A
+            },
+            {
+                id: 19,
+                question: "1911 年底，胡志明在法国联合运输公司的商船上工作时，担任什么职位？",
+                options: [
+                    "A. 厨师助手",
+                    "B. 司机助手",
+                    "C. 管理职员",
+                    "D. 办公室职员"
+                ],
+                correct: 0 // A
+            },
+            {
+                id: 20,
+                question: "1924 年 12 月中旬，阮爱国在哪里举办越南青年训练班？",
+                options: [
+                    "A. 中国广州",
+                    "B. 法国巴黎",
+                    "C. 苏联莫斯科",
+                    "D. 泰国曼谷"
+                ],
+                correct: 0 // A
+            },
+            {
+                id: 171,
+                question: "大叻是越南哪个省的省会?",
+                options: [
+                    "A. 林安省",
+                    "B. 林同省",
+                    "C. 平定省",
+                    "D. 广南省"
+                ],
+                correct: 1 // B
+            },
+            {
+                id: 172,
+                question: "大叻的年平均气温大约是多少?",
+                options: [
+                    "A. 10°C",
+                    "B. 17°C",
+                    "C. 23°C",
+                    "D. 30°C"
+                ],
+                correct: 1 // B
+            },
+            {
+                id: 173,
+                question: "大叻被称为 \"万花之城\"，以下哪种花在当地可以见到？",
+                options: [
+                    "A. 樱花",
+                    "B. 雄菊",
+                    "C. 太阳花",
+                    "D. 茉莉花"
+                ],
+                correct: 0 // A
+            },
+            {
+                id: 174,
+                question: "在大叻市区可以游览的景点不包括以下哪一项?",
+                options: [
+                    "A. 春香湖",
+                    "B. 芽庄湾",
+                    "C. 情人谷",
+                    "D. 千鲤瀑布"
+                ],
+                correct: 1 // B
+            },
+            {
+                id: 175,
+                question: "在情人谷可以看到什么有趣的表演?",
+                options: [
+                    "A. 龙舟比赛",
+                    "B. 马术表演",
+                    "C. 水上木偶戏",
+                    "D. 越南传统歌舞"
+                ],
+                correct: 1 // B
+            },
+            {
+                id: 176,
+                question: "大功花圃位于哪个地方？",
+                options: [
+                    "A. 市郊",
+                    "B. 市中心",
+                    "C. 情人谷",
+                    "D. 春香湖畔"
+                ],
+                correct: 1 // B
+            },
+            {
+                id: 177,
+                question: "春香湖的面积大约是多少?",
+                options: [
+                    "A. 3 平方公里",
+                    "B. 5 平方公里",
+                    "C. 7 平方公里",
+                    "D. 10 平方公里"
+                ],
+                correct: 1 // B
+            },
+            {
+                id: 178,
+                question: "在大功花圃中，可以看到哪些美丽的景象？",
+                options: [
+                    "A. 农田",
+                    "B. 野生动物",
+                    "C. 山脉和湖泊",
+                    "D. 奇花异草，争奇斗艳"
+                ],
+                correct: 3 // D
+            },
+            {
+                id: 179,
+                question: "春香湖附近的天主教堂有什么特点？",
+                options: [
+                    "A. 端庄优雅",
+                    "B. 建筑现代",
+                    "C. 彩色玻璃窗",
+                    "D. 巨大钟塔"
+                ],
+                correct: 0 // A
+            },
+            {
+                id: 180,
+                question: "春香湖是游客的什么重要区域？",
+                options: [
+                    "A. 购物区",
+                    "B. 娱乐区",
+                    "C. 文化活动区",
+                    "D. 住宿和用餐的主要区域"
+                ],
+                correct: 3 // D
+            }
+        ];
+
+        let userAnswers = {};
+        let totalQuestions = questions.length;
+
+        // Khởi tạo quiz
+        function initQuiz() {
+            renderAllQuestions();
+            updateProgress();
+        }
+
+        // Hiển thị tất cả câu hỏi
+        function renderAllQuestions() {
+            const container = document.getElementById('questionsContainer');
+
+            container.innerHTML = questions.map((question, index) => {
+                const userAnswer = userAnswers[index];
+                const isAnswered = userAnswer !== undefined;
+                const isCorrect = isAnswered && userAnswer === question.correct;
+
+                return `
+                    <div class="question-card" data-question-index="${index}">
+                        <div class="question-number">Câu ${question.id}</div>
+                        <div class="question-text">${question.question}</div>
+                        <div class="options">
+                            ${question.options.map((option, optIndex) => {
+                    let optionClass = '';
+                    if (isAnswered) {
+                        if (optIndex === question.correct) {
+                            optionClass = 'show-correct';
+                        } else if (optIndex === userAnswer && !isCorrect) {
+                            optionClass = 'incorrect';
+                        } else if (optIndex === userAnswer && isCorrect) {
+                            optionClass = 'correct selected';
+                        }
+                    } else if (userAnswer === optIndex) {
+                        optionClass = 'selected';
+                    }
+
+                    return `
+                                    <div class="option ${optionClass}" 
+                                         onclick="${!isAnswered ? `selectAnswer(${index}, ${optIndex})` : ''}"
+                                         style="${isAnswered ? 'cursor: default;' : ''}">
+                                        <input type="radio" 
+                                               name="question${index}" 
+                                               id="option${index}_${optIndex}" 
+                                               value="${optIndex}"
+                                               ${userAnswer === optIndex ? 'checked' : ''}
+                                               ${isAnswered ? 'disabled' : ''}
+                                               onchange="${!isAnswered ? `selectAnswer(${index}, ${optIndex})` : ''}">
+                                        <label class="option-label" for="option${index}_${optIndex}" 
+                                               style="${isAnswered ? 'cursor: default;' : ''}">${option}</label>
+                                    </div>
+                                `;
+                }).join('')}
+                        </div>
+                        ${isAnswered ? `
+                            <div class="answer-feedback ${isCorrect ? 'correct' : 'incorrect'} show">
+                                ${isCorrect ? '✓ Đúng!' : '✗ Sai!'}
+                            </div>
+                            ${!isCorrect ? `
+                                <div class="correct-answer-label">
+                                    Đáp án đúng: ${question.options[question.correct]}
+                                </div>
+                            ` : ''}
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            updateQuestionCounter();
+        }
+
+        // Cập nhật chỉ một câu hỏi (tránh nháy màn hình)
+        function updateQuestionCard(questionIndex) {
+            const question = questions[questionIndex];
+            const userAnswer = userAnswers[questionIndex];
+            const isAnswered = userAnswer !== undefined;
+            const isCorrect = isAnswered && userAnswer === question.correct;
+
+            const questionCard = document.querySelector(`[data-question-index="${questionIndex}"]`);
+            if (!questionCard) return;
+
+            const optionsContainer = questionCard.querySelector('.options');
+            const existingFeedback = questionCard.querySelector('.answer-feedback');
+            const existingCorrectLabel = questionCard.querySelector('.correct-answer-label');
+
+            // Cập nhật các option
+            optionsContainer.innerHTML = question.options.map((option, optIndex) => {
+                let optionClass = '';
+                if (isAnswered) {
+                    if (optIndex === question.correct) {
+                        optionClass = 'show-correct';
+                    } else if (optIndex === userAnswer && !isCorrect) {
+                        optionClass = 'incorrect';
+                    } else if (optIndex === userAnswer && isCorrect) {
+                        optionClass = 'correct selected';
+                    }
+                } else if (userAnswer === optIndex) {
+                    optionClass = 'selected';
+                }
+
+                return `
+                    <div class="option ${optionClass}" 
+                         onclick="${!isAnswered ? `selectAnswer(${questionIndex}, ${optIndex})` : ''}"
+                         style="${isAnswered ? 'cursor: default;' : ''}">
+                        <input type="radio" 
+                               name="question${questionIndex}" 
+                               id="option${questionIndex}_${optIndex}" 
+                               value="${optIndex}"
+                               ${userAnswer === optIndex ? 'checked' : ''}
+                               ${isAnswered ? 'disabled' : ''}
+                               onchange="${!isAnswered ? `selectAnswer(${questionIndex}, ${optIndex})` : ''}">
+                        <label class="option-label" for="option${questionIndex}_${optIndex}" 
+                               style="${isAnswered ? 'cursor: default;' : ''}">${option}</label>
+                    </div>
+                `;
+            }).join('');
+
+            // Cập nhật feedback
+            if (isAnswered) {
+                if (!existingFeedback) {
+                    const feedback = document.createElement('div');
+                    feedback.className = `answer-feedback ${isCorrect ? 'correct' : 'incorrect'} show`;
+                    feedback.textContent = isCorrect ? '✓ Đúng!' : '✗ Sai!';
+                    optionsContainer.parentNode.insertBefore(feedback, optionsContainer.nextSibling);
+                } else {
+                    existingFeedback.className = `answer-feedback ${isCorrect ? 'correct' : 'incorrect'} show`;
+                    existingFeedback.textContent = isCorrect ? '✓ Đúng!' : '✗ Sai!';
+                }
+
+                if (!isCorrect) {
+                    if (!existingCorrectLabel) {
+                        const correctLabel = document.createElement('div');
+                        correctLabel.className = 'correct-answer-label';
+                        correctLabel.textContent = `Đáp án đúng: ${question.options[question.correct]}`;
+                        const feedback = questionCard.querySelector('.answer-feedback');
+                        feedback.parentNode.insertBefore(correctLabel, feedback.nextSibling);
+                    }
+                } else if (existingCorrectLabel) {
+                    existingCorrectLabel.remove();
+                }
+            }
+        }
+
+        // Chọn đáp án
+        function selectAnswer(questionIndex, answerIndex) {
+            userAnswers[questionIndex] = answerIndex;
+            updateQuestionCard(questionIndex);
+            updateProgress();
+            updateQuestionCounter();
+        }
+
+        // Cập nhật thanh tiến trình
+        function updateProgress() {
+            const answeredCount = Object.keys(userAnswers).length;
+            const progress = (answeredCount / totalQuestions) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        // Cập nhật số câu đã trả lời
+        function updateQuestionCounter() {
+            const answeredCount = Object.keys(userAnswers).length;
+            document.getElementById('questionCounter').textContent =
+                `Đã trả lời: ${answeredCount} / ${totalQuestions} câu hỏi`;
+        }
+
+        // Hiển thị kết quả
+        function showResults() {
+            let correctCount = 0;
+            let reviewHTML = '';
+
+            questions.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                const isCorrect = userAnswer === question.correct;
+
+                if (isCorrect) {
+                    correctCount++;
+                }
+
+                reviewHTML += `
+                    <div class="review-item">
+                        <div class="review-question">
+                            Câu ${question.id}: ${question.question}
+                        </div>
+                        <div class="review-answer ${isCorrect ? 'correct' : 'incorrect'}">
+                            Đáp án của bạn: ${userAnswer !== undefined ? question.options[userAnswer] : 'Chưa trả lời'}
+                        </div>
+                        <div class="review-answer correct">
+                            Đáp án đúng: ${question.options[question.correct]}
+                        </div>
+                    </div>
+                `;
+            });
+
+            const score = Math.round((correctCount / totalQuestions) * 100);
+
+            document.getElementById('quizContainer').style.display = 'none';
+            document.getElementById('resultsContainer').classList.add('show');
+            document.getElementById('scoreDisplay').textContent = `${correctCount} / ${totalQuestions}`;
+            document.getElementById('scoreInfo').textContent =
+                `Bạn đã trả lời đúng ${correctCount} câu trong tổng số ${totalQuestions} câu (${score}%)`;
+            document.getElementById('reviewSection').innerHTML = reviewHTML;
+        }
+
+        // Làm lại
+        function restartQuiz() {
+            userAnswers = {};
+            document.getElementById('quizContainer').style.display = 'block';
+            document.getElementById('resultsContainer').classList.remove('show');
+            initQuiz();
+        }
+
+        // Khởi động khi trang được tải
+        window.onload = function () {
+            initQuiz();
+        };
+    </script>
+</body>
+
+</html>
