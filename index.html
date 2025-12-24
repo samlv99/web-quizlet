@@ -61,7 +61,7 @@
         }
 
         .quiz-container {
-            padding: 40px;
+            padding: 15px;
             max-height: calc(100vh - 200px);
             overflow-y: auto;
         }
@@ -365,6 +365,18 @@
         .restart-btn-container {
             display: flex;
             align-items: center;
+        }
+
+        .top-bar {
+            position: sticky;
+            top: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            background: white;
+            z-index: 5;
+            border-bottom: 1px solid #e6e9f0;
         }
 
         .quiz-container::-webkit-scrollbar {
