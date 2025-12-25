@@ -335,12 +335,34 @@
             background: #667eea;
             color: white;
             margin-top: 0;
+            min-width: 140px;
+            padding: 12px 24px;
+            font-size: 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
         }
 
         .btn-restart:hover {
             background: #5568d3;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-restart:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-restart.btn-wrong {
+            background: #dc3545;
+            box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+        }
+
+        .btn-restart.btn-wrong:hover {
+            background: #c82333;
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
         }
 
         .top-bar {
@@ -365,6 +387,31 @@
         .restart-btn-container {
             display: flex;
             align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 600px) {
+            .restart-btn-container {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .restart-btn-container .btn {
+                width: 100%;
+            }
+        }
+
+        .top-bar {
+            position: sticky;
+            top: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            background: white;
+            z-index: 5;
+            border-bottom: 1px solid #e6e9f0;
         }
 
         .top-bar {
@@ -413,7 +460,8 @@
             <div class="top-bar">
                 <div class="question-counter" id="questionCounter"></div>
                 <div class="restart-btn-container">
-                    <button class="btn btn-restart" onclick="restartQuiz()">Làm lại</button>
+                    <button class="btn btn-restart" onclick="restartFromBeginning()">Làm lại</button>
+                    <button class="btn btn-restart btn-wrong" onclick="restartQuiz()">Câu sai</button>
                 </div>
             </div>
             <div class="questions-list" id="questionsContainer"></div>
@@ -424,7 +472,10 @@
             <div class="score" id="scoreDisplay"></div>
             <div class="score-info" id="scoreInfo"></div>
             <div class="review-section" id="reviewSection"></div>
-            <button class="btn btn-restart" onclick="restartQuiz()">Làm lại</button>
+            <div style="display: flex; gap: 15px; justify-content: center; margin-top: 30px;">
+                <button class="btn btn-restart" onclick="restartFromBeginning()">Làm lại</button>
+                <button class="btn btn-restart btn-wrong" onclick="restartQuiz()">Câu sai</button>
+            </div>
         </div>
     </div>
 
@@ -2415,6 +2466,8 @@
 
         let userAnswers = {};
         let totalQuestions = questions.length;
+        let showOnlyWrongAnswers = false;
+        let wrongQuestionIndices = [];
 
         // Khởi tạo quiz
         function initQuiz() {
@@ -2422,11 +2475,28 @@
             updateProgress();
         }
 
+        // Lấy danh sách câu hỏi cần hiển thị
+        function getQuestionsToShow() {
+            if (showOnlyWrongAnswers && wrongQuestionIndices.length > 0) {
+                return wrongQuestionIndices.map(index => ({
+                    originalIndex: index,
+                    question: questions[index]
+                }));
+            }
+            return questions.map((question, index) => ({
+                originalIndex: index,
+                question: question
+            }));
+        }
+
         // Hiển thị tất cả câu hỏi
         function renderAllQuestions() {
             const container = document.getElementById('questionsContainer');
+            const questionsToShow = getQuestionsToShow();
 
-            container.innerHTML = questions.map((question, index) => {
+            container.innerHTML = questionsToShow.map((item, displayIndex) => {
+                const index = item.originalIndex;
+                const question = item.question;
                 const userAnswer = userAnswers[index];
                 const isAnswered = userAnswer !== undefined;
                 const isCorrect = isAnswered && userAnswer === question.correct;
@@ -2566,16 +2636,35 @@
 
         // Cập nhật thanh tiến trình
         function updateProgress() {
-            const answeredCount = Object.keys(userAnswers).length;
-            const progress = (answeredCount / totalQuestions) * 100;
-            document.getElementById('progressFill').style.width = progress + '%';
+            if (showOnlyWrongAnswers) {
+                const questionsToShow = getQuestionsToShow();
+                const answeredInWrong = questionsToShow.filter(item =>
+                    userAnswers[item.originalIndex] !== undefined
+                ).length;
+                const progress = questionsToShow.length > 0
+                    ? (answeredInWrong / questionsToShow.length) * 100
+                    : 0;
+                document.getElementById('progressFill').style.width = progress + '%';
+            } else {
+                const answeredCount = Object.keys(userAnswers).length;
+                const progress = (answeredCount / totalQuestions) * 100;
+                document.getElementById('progressFill').style.width = progress + '%';
+            }
         }
 
         // Cập nhật số câu đã trả lời
         function updateQuestionCounter() {
             const answeredCount = Object.keys(userAnswers).length;
-            document.getElementById('questionCounter').textContent =
-                `Đã trả lời: ${answeredCount} / ${totalQuestions} câu hỏi`;
+            const questionsToShow = getQuestionsToShow();
+            const displayCount = questionsToShow.length;
+
+            if (showOnlyWrongAnswers) {
+                document.getElementById('questionCounter').textContent =
+                    `Đang làm lại: ${displayCount} câu sai (Đã trả lời: ${answeredCount} / ${totalQuestions} câu hỏi)`;
+            } else {
+                document.getElementById('questionCounter').textContent =
+                    `Đã trả lời: ${answeredCount} / ${totalQuestions} câu hỏi`;
+            }
         }
 
         // Hiển thị kết quả
@@ -2616,9 +2705,43 @@
             document.getElementById('reviewSection').innerHTML = reviewHTML;
         }
 
-        // Làm lại
+        // Lấy danh sách các câu hỏi đã trả lời sai
+        function getWrongQuestionIndices() {
+            const wrongIndices = [];
+            questions.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                if (userAnswer !== undefined && userAnswer !== question.correct) {
+                    wrongIndices.push(index);
+                }
+            });
+            return wrongIndices;
+        }
+
+        // Làm lại chỉ các câu sai
         function restartQuiz() {
+            wrongQuestionIndices = getWrongQuestionIndices();
+
+            if (wrongQuestionIndices.length === 0) {
+                alert('Bạn chưa có câu nào trả lời sai!');
+                return;
+            }
+
+            // Xóa đáp án của các câu sai để làm lại
+            wrongQuestionIndices.forEach(index => {
+                delete userAnswers[index];
+            });
+
+            showOnlyWrongAnswers = true;
+            document.getElementById('quizContainer').style.display = 'block';
+            document.getElementById('resultsContainer').classList.remove('show');
+            initQuiz();
+        }
+
+        // Làm lại từ đầu (reset toàn bộ)
+        function restartFromBeginning() {
             userAnswers = {};
+            showOnlyWrongAnswers = false;
+            wrongQuestionIndices = [];
             document.getElementById('quizContainer').style.display = 'block';
             document.getElementById('resultsContainer').classList.remove('show');
             initQuiz();
